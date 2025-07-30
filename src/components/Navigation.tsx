@@ -29,7 +29,7 @@ const Navigation = ({ activeSection, onSectionChange }: NavigationProps) => {
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
               <Heart className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold text-foreground">MediCare Plus</span>
+            <span className="text-xl font-semibold text-foreground">Swastya-Setu</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -57,7 +57,12 @@ const Navigation = ({ activeSection, onSectionChange }: NavigationProps) => {
 
           {/* User Profile */}
           <div className="hidden md:flex items-center space-x-2">
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center space-x-2"
+              onClick={() => onSectionChange('profile')}
+            >
               <User className="w-4 h-4" />
               <span>Profile</span>
             </Button>
@@ -106,7 +111,14 @@ const Navigation = ({ activeSection, onSectionChange }: NavigationProps) => {
                   </Button>
                 );
               })}
-              <Button variant="outline" className="flex items-center space-x-2 justify-start w-full mt-4">
+              <Button 
+                variant="outline" 
+                className="flex items-center space-x-2 justify-start w-full mt-4"
+                onClick={() => {
+                  onSectionChange('profile');
+                  setIsMobileMenuOpen(false);
+                }}
+              >
                 <User className="w-4 h-4" />
                 <span>Profile</span>
               </Button>

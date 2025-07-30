@@ -41,16 +41,24 @@ const AppointmentBooking = ({ selectedDoctorId }: AppointmentBookingProps) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const { toast } = useToast();
 
-  // Mock available dates and times
-  const availableDates = [
-    '2024-01-15',
-    '2024-01-16',
-    '2024-01-17',
-    '2024-01-18',
-    '2024-01-19',
-    '2024-01-22',
-    '2024-01-23'
-  ];
+  // Generate real-time available dates (next 14 days)
+  const generateAvailableDates = () => {
+    const dates = [];
+    const today = new Date();
+    
+    for (let i = 1; i <= 14; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      
+      // Skip Sundays (0 = Sunday)
+      if (date.getDay() !== 0) {
+        dates.push(date.toISOString().split('T')[0]);
+      }
+    }
+    return dates;
+  };
+
+  const availableDates = generateAvailableDates();
 
   const timeSlots: TimeSlot[] = [
     { time: '09:00', available: true },

@@ -116,20 +116,72 @@ const VirtualConsultation = () => {
     });
   };
 
-  const toggleVideo = () => {
-    setIsVideoOn(!isVideoOn);
-    toast({
-      title: isVideoOn ? "Camera Off" : "Camera On",
-      description: `Your camera has been turned ${isVideoOn ? 'off' : 'on'}.`
-    });
+  const toggleVideo = async () => {
+    try {
+      if (!isVideoOn) {
+        // Request camera permission and start video
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setIsVideoOn(true);
+        toast({
+          title: "Camera On",
+          description: "Your camera has been activated successfully."
+        });
+        // Store stream for later cleanup
+        (window as any).currentVideoStream = stream;
+      } else {
+        // Stop video stream
+        const stream = (window as any).currentVideoStream;
+        if (stream) {
+          stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        }
+        setIsVideoOn(false);
+        toast({
+          title: "Camera Off",
+          description: "Your camera has been turned off."
+        });
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      toast({
+        variant: "destructive",
+        title: "Camera Error",
+        description: "Unable to access camera. Please check permissions and try again."
+      });
+    }
   };
 
-  const toggleAudio = () => {
-    setIsAudioOn(!isAudioOn);
-    toast({
-      title: isAudioOn ? "Microphone Muted" : "Microphone Unmuted",
-      description: `Your microphone has been ${isAudioOn ? 'muted' : 'unmuted'}.`
-    });
+  const toggleAudio = async () => {
+    try {
+      if (!isAudioOn) {
+        // Request microphone permission and start audio
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setIsAudioOn(true);
+        toast({
+          title: "Microphone Unmuted",
+          description: "Your microphone has been activated successfully."
+        });
+        // Store stream for later cleanup
+        (window as any).currentAudioStream = stream;
+      } else {
+        // Stop audio stream
+        const stream = (window as any).currentAudioStream;
+        if (stream) {
+          stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        }
+        setIsAudioOn(false);
+        toast({
+          title: "Microphone Muted",
+          description: "Your microphone has been muted."
+        });
+      }
+    } catch (error) {
+      console.error('Microphone error:', error);
+      toast({
+        variant: "destructive",
+        title: "Microphone Error",
+        description: "Unable to access microphone. Please check permissions and try again."
+      });
+    }
   };
 
   const toggleScreenShare = () => {

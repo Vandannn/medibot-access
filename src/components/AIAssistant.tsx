@@ -80,25 +80,36 @@ const AIAssistant = () => {
       const recognition = new SpeechRecognition();
       
       recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.interimResults = true;
       recognition.lang = 'en-US';
 
       recognition.onstart = () => {
         setIsListening(true);
+        toast({
+          title: "Listening...",
+          description: "Speak now to describe your symptoms."
+        });
       };
 
       recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
         setInputText(transcript);
-        setIsListening(false);
+        
+        if (event.results[event.results.length - 1].isFinal) {
+          setIsListening(false);
+        }
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (event) => {
         setIsListening(false);
+        console.error('Speech recognition error:', event.error);
         toast({
           variant: "destructive",
           title: "Voice Recognition Error",
-          description: "Could not recognize speech. Please try again."
+          description: `Could not recognize speech: ${event.error}. Please try again.`
         });
       };
 
@@ -106,23 +117,92 @@ const AIAssistant = () => {
         setIsListening(false);
       };
 
-      recognition.start();
+      try {
+        recognition.start();
+      } catch (error) {
+        setIsListening(false);
+        toast({
+          variant: "destructive",
+          title: "Voice Recognition Error",
+          description: "Failed to start voice recognition. Please try again."
+        });
+      }
     } else {
       toast({
         variant: "destructive",
         title: "Not Supported",
-        description: "Voice recognition is not supported in your browser."
+        description: "Voice recognition is not supported in your browser. Please use Chrome, Safari, or Edge."
       });
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      toast({
-        title: "Image Upload",
-        description: "Image analysis feature coming soon!"
-      });
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          variant: "destructive",
+          title: "Invalid File",
+          description: "Please upload an image file (JPG, PNG, GIF, etc.)"
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "File Too Large",
+          description: "Please upload an image smaller than 5MB."
+        });
+        return;
+      }
+
+      try {
+        // Create a preview of the uploaded image
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageDataUrl = event.target?.result as string;
+          
+          // Add image message to chat
+          const imageMessage: Message = {
+            id: Date.now().toString(),
+            type: 'user',
+            content: `[Image uploaded: ${file.name}]\n\nPlease analyze this medical image and provide insights.`,
+            timestamp: new Date()
+          };
+
+          setMessages(prev => [...prev, imageMessage]);
+          setIsLoading(true);
+
+          // Simulate AI response for image analysis
+          setTimeout(() => {
+            const aiResponse: Message = {
+              id: (Date.now() + 1).toString(),
+              type: 'ai',
+              content: `I can see you've uploaded an image for analysis. While I can provide general guidance, please note:\n\n• Image analysis should be performed by qualified medical professionals\n• For skin conditions, lesions, or rashes, consult a dermatologist\n• For X-rays or scans, see the appropriate specialist\n• Upload quality and lighting can affect assessment\n\nBased on the image type, I recommend scheduling an appointment with the relevant specialist for proper diagnosis.`,
+              timestamp: new Date()
+            };
+            setMessages(prev => [...prev, aiResponse]);
+            setIsLoading(false);
+          }, 2000);
+        };
+
+        reader.readAsDataURL(file);
+        
+        toast({
+          title: "Image Uploaded",
+          description: "Analyzing your image... Please wait for AI response."
+        });
+
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Upload Error",
+          description: "Failed to process the image. Please try again."
+        });
+      }
     }
   };
 

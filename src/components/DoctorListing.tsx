@@ -23,7 +23,7 @@ interface Doctor {
 }
 
 interface DoctorListingProps {
-  onBookAppointment: (doctorId: string) => void;
+  onDoctorSelect: (doctorId: string) => void;
 }
 
 const mockDoctors: Doctor[] = [
@@ -107,7 +107,7 @@ const mockDoctors: Doctor[] = [
   }
 ];
 
-const DoctorListing = ({ onBookAppointment }: DoctorListingProps) => {
+const DoctorListing = ({ onDoctorSelect }: DoctorListingProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
   const [selectedLocation, setSelectedLocation] = useState('all');
@@ -285,7 +285,7 @@ const DoctorListing = ({ onBookAppointment }: DoctorListingProps) => {
               </div>
 
               <Button 
-                onClick={() => onBookAppointment(doctor.id)}
+                onClick={() => onDoctorSelect(doctor.id)}
                 className="w-full mt-4 flex items-center space-x-2"
               >
                 <Calendar className="w-4 h-4" />
